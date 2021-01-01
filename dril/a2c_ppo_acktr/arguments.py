@@ -132,6 +132,7 @@ def get_args():
         default=10,
         type=int,
         help='Number of evaluation epsiodes (default: 10)')
+    parser.add_argument('--sticky-actions', action='store_true', default=False, help='boolean to determine if given environment will run with sticky actions')
 
     parser.add_argument(
         '--system',

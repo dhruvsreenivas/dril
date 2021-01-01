@@ -57,7 +57,7 @@ def main():
 
     envs = make_vec_envs(args.env_name, args.seed, args.num_processes, args.gamma,
                          args.log_dir, device, False, use_obs_norm=args.use_obs_norm,
-                         max_steps=args.atari_max_steps)
+                         max_steps=args.atari_max_steps, sticky=args.sticky_actions)
 
     actor_critic = Policy(
         envs.observation_space.shape,

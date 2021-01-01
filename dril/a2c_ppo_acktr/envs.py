@@ -39,7 +39,7 @@ env_hyperparam = ['BipedalWalkerHardcore-v2', 'BipedalWalker-v2',\
 retro_envs = ['SuperMarioKart-Snes', 'StreetFighterIISpecialChampionEdition-Genesis',\
               'AyrtonSennasSuperMonacoGPII-Genesis']
 
-def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_steps=None):
+def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_steps=None, sticky=False):
     def _thunk():
         if env_id.startswith("dm"):
             _, domain, task = env_id.split('.')
@@ -59,7 +59,10 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_st
             env = make_retro(game=env_id)
             #env = SuperMarioKartDiscretizer(env)
         else:
-            env = gym.make(env_id)
+            if not sticky:
+                env = gym.make(env_id)
+            else:
+                env = StickyActionEnv(gym.make(env_id))
 
         is_atari = hasattr(gym.envs, 'atari') and isinstance(
             env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
@@ -116,6 +119,23 @@ def wrap_deepmind_retro(env, scale=True, frame_stack=0):
         env = ScaledFloatFrame(env)
     return env
 
+class StickyActionEnv(gym.Wrapper):
+    def __init__(self, env, p=0.25):
+        super(StickyActionEnv, self).__init__(env)
+        self.p = p
+        self.last_action = 0
+
+    def reset(self):
+        self.last_action = 0
+        return self.env.reset()
+
+    def step(self, action):
+        if self.unwrapped.np_random.uniform() < self.p:
+            action = self.last_action
+        self.last_action = last.action
+        obs, reward, done, info = self.env.step(action)
+        return obs, reward, done, info
+
 class SuperMarioKartDiscretizer(gym.ActionWrapper):
     """
     Wrap a gym-retro environment and make it use discrete
@@ -156,10 +176,11 @@ def make_vec_envs(env_name,
                   training=False,
                   norm_obs=False,
                   time=False,
-                  use_obs_norm=False):
+                  use_obs_norm=False,
+                  sticky=False):
 
     envs = [
-        make_env(env_name, seed, i, log_dir, allow_early_resets, time=time, max_steps=max_steps)
+        make_env(env_name, seed, i, log_dir, allow_early_resets, time=time, max_steps=max_steps, sticky=sticky)
         for i in range(num_processes)
     ]
 
