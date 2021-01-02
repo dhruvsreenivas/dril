@@ -59,10 +59,7 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_st
             env = make_retro(game=env_id)
             #env = SuperMarioKartDiscretizer(env)
         else:
-            if not sticky:
-                env = gym.make(env_id)
-            else:
-                env = StickyActionEnv(gym.make(env_id))
+            env = gym.make(env_id)
 
         is_atari = hasattr(gym.envs, 'atari') and isinstance(
             env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
@@ -84,6 +81,8 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_st
         if is_atari:
             if len(env.observation_space.shape) == 3:
                 env = wrap_deepmind(env)
+                if sticky:
+                    env = StickyActionEnv(env)
         elif env_id in retro_envs:
             if len(env.observation_space.shape) == 3:
                 env = wrap_deepmind_retro(env, frame_stack=0)
@@ -132,7 +131,7 @@ class StickyActionEnv(gym.Wrapper):
     def step(self, action):
         if self.unwrapped.np_random.uniform() < self.p:
             action = self.last_action
-        self.last_action = last.action
+        self.last_action = action
         obs, reward, done, info = self.env.step(action)
         return obs, reward, done, info
 
