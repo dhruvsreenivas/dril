@@ -81,8 +81,6 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_st
         if is_atari:
             if len(env.observation_space.shape) == 3:
                 env = wrap_deepmind(env)
-                if sticky:
-                    env = StickyActionEnv(env)
         elif env_id in retro_envs:
             if len(env.observation_space.shape) == 3:
                 env = wrap_deepmind_retro(env, frame_stack=0)
@@ -97,10 +95,15 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets, time=False, max_st
         if env_id not in ['duckietown']:
             obs_shape = env.observation_space.shape
             if len(obs_shape) == 3 and obs_shape[2] in [1, 3]:
+                print('other if statement held true')
                 env = TransposeImage(env, op=[2, 0, 1])
 
         if time:
             env = TimeFeatureWrapper(env)
+
+        if sticky:
+            print('we made it boys, sticky activated')
+            env = StickyActionEnv(env)
 
         return env
 
@@ -208,6 +211,7 @@ def make_vec_envs(env_name,
         if num_frame_stack is not None:
             envs = VecPyTorchFrameStack(envs, num_frame_stack, device)
         elif len(envs.observation_space.shape) == 3:
+            print('4 frames stacked on top of each other check has passed')
             envs = VecPyTorchFrameStack(envs, 4, device)
 
     return envs

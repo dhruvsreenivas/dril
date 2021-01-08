@@ -82,6 +82,7 @@ class Policy(nn.Module):
             if env_name in  ['duckietown']:
                 base = DuckieTownCNN
             elif len(obs_shape) == 3:
+                print('CNN base check passed')
                 base = CNNBase
             elif len(obs_shape) == 1:
                 base = MLPBase

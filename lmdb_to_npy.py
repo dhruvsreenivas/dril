@@ -22,7 +22,7 @@ def lmdb_to_npy(lmdb_file_path):
         else:
             state, action, _ = db[idx]
 
-
+        state = state * 255.0
         state_list.append(state)
         action_list.append(action)
 

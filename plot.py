@@ -175,7 +175,7 @@ def main():
         add_line_plot(gail_results, colors[f'gail{idx}'], styles[f'gail{idx}'])
         final_keys.append(key)
 
-    plt.legend(['Expert','BC','DRIL', 'RANDOM']+final_keys, fontsize=6, loc='bottom right')
+    plt.legend(['Expert','BC','DRIL', 'RANDOM']+final_keys, fontsize=6, loc='lower right')
     fsize=16
 
     plt.xlabel('Expert Trajectories', fontsize=fsize)
